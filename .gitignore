@@ -1,0 +1,50 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local environment files
+.env*.local
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Previews & Prototypes
+standalone-preview.html
+*.preview.html
+
+# Vercel & Turbopack
+.vercel
+.turbo
+
+# TypeScript cache
+*.tsbuildinfo
+next-env.d.ts.bak
