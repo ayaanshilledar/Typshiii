@@ -7,7 +7,7 @@ import { TypingText } from './TypingText';
 import { LiveMetrics } from './LiveMetrics';
 import { TestControls } from './TestControls';
 import { SettingsModal } from '@/components/settings/SettingsModal';
-import { setSoundEnabled } from '@/lib/audio/sound';
+import { setSoundEnabled, setSoundTheme, setSoundVolume } from '@/lib/audio/sound';
 
 export function TypingTest() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -172,6 +172,8 @@ export function TypingTest() {
         isOpen={isSettingsOpen}
         onSettingsChange={(newSettings) => {
           setSoundEnabled(newSettings.soundEnabled);
+          setSoundTheme(newSettings.soundTheme);
+          setSoundVolume(newSettings.soundVolume / 100);
         }}
         onClose={() => {
           setIsSettingsOpen(false);

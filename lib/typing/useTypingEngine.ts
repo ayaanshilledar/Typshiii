@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { TypingEngine } from './engine';
 import { TypingState, TestMode, TypingSession } from './types';
 import { saveSession } from '@/lib/storage/sessions';
-import { playKeyClick, setSoundEnabled } from '@/lib/audio/sound';
+import { playKeyClick, setSoundEnabled, setSoundTheme, setSoundVolume } from '@/lib/audio/sound';
 
 export interface UseTypingEngineOptions {
   initialMode?: TestMode;
@@ -79,14 +79,16 @@ export function useTypingEngine(options: UseTypingEngineOptions = {}): UseTyping
         const parsed = JSON.parse(data);
         if (typeof parsed.soundEnabled === 'boolean') {
           setSoundEnabled(parsed.soundEnabled);
-        } else {
-          setSoundEnabled(true);
         }
-      } else {
-        setSoundEnabled(true);
+        if (parsed.soundTheme) {
+          setSoundTheme(parsed.soundTheme);
+        }
+        if (typeof parsed.soundVolume === 'number') {
+          setSoundVolume(parsed.soundVolume / 100);
+        }
       }
     } catch {
-      setSoundEnabled(true);
+      // fallback
     }
 
     return () => {

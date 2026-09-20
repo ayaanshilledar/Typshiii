@@ -1,13 +1,24 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Sliders, X, Check, Volume2, VolumeX, Eye, EyeOff } from 'lucide-react';
+import { Sliders, X } from 'lucide-react';
+import {
+  SoundTheme,
+  setSoundEnabled,
+  setSoundTheme,
+  setSoundVolume,
+  playKeyClick,
+} from '@/lib/audio/sound';
+
+export type { SoundTheme };
 
 export interface SettingsState {
   caretStyle: 'line' | 'block' | 'underline';
   showLiveWpm: boolean;
   showLiveAcc: boolean;
   soundEnabled: boolean;
+  soundTheme: SoundTheme;
+  soundVolume: number; // 0 to 100
 }
 
 export const DEFAULT_SETTINGS: SettingsState = {
@@ -15,9 +26,19 @@ export const DEFAULT_SETTINGS: SettingsState = {
   showLiveWpm: true,
   showLiveAcc: true,
   soundEnabled: true,
+  soundTheme: 'mechanical',
+  soundVolume: 70,
 };
 
 export const SETTINGS_KEY = 'typeshii_settings_v1';
+
+export const SOUND_THEMES: { id: SoundTheme; name: string }[] = [
+  { id: 'mechanical', name: 'mechanical' },
+  { id: 'thock', name: 'thock' },
+  { id: 'creamy', name: 'creamy' },
+  { id: 'typewriter', name: 'typewriter' },
+  { id: 'pop', name: 'pop' },
+];
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -27,14 +48,23 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsModalProps) {
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
-  const [saved, setSaved] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
       const data = localStorage.getItem(SETTINGS_KEY);
       if (data) {
-        setSettings(JSON.parse(data));
+        const parsed = JSON.parse(data);
+        const merged: SettingsState = {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+          soundTheme: parsed.soundTheme || DEFAULT_SETTINGS.soundTheme,
+          soundVolume: typeof parsed.soundVolume === 'number' ? parsed.soundVolume : DEFAULT_SETTINGS.soundVolume,
+        };
+        setSettings(merged);
+        setSoundEnabled(merged.soundEnabled);
+        setSoundTheme(merged.soundTheme);
+        setSoundVolume(merged.soundVolume / 100);
       }
     } catch {
       // fallback
@@ -60,11 +90,23 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
     const updated = { ...settings, [key]: value };
     setSettings(updated);
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated));
+
+    // Sync active audio parameters immediately
+    if (key === 'soundEnabled') {
+      setSoundEnabled(value as boolean);
+    } else if (key === 'soundTheme') {
+      setSoundTheme(value as SoundTheme);
+      // Play a preview click when switching themes so user can listen to it
+      if (updated.soundEnabled) {
+        playKeyClick('char', value as SoundTheme);
+      }
+    } else if (key === 'soundVolume') {
+      setSoundVolume((value as number) / 100);
+    }
+
     if (onSettingsChange) {
       onSettingsChange(updated);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
   };
 
   if (!isOpen) return null;
@@ -85,12 +127,6 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
           <div className="flex items-center gap-2 sm:gap-2.5">
             <Sliders className="w-4 h-4 text-accent" />
             <h2 className="text-base font-semibold text-foreground tracking-tight">settings</h2>
-            {saved && (
-              <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium ml-2 transition-all">
-                <Check className="w-3.5 h-3.5" />
-                <span>saved</span>
-              </span>
-            )}
           </div>
 
           <button
@@ -166,22 +202,47 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
             </button>
           </div>
 
-          {/* Sound toggle */}
-          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
-            <div>
-              <span className="text-sm font-medium text-foreground block">Keystroke Sound</span>
-              <span className="text-xs text-muted">Mechanical switch click audio</span>
+          {/* Keystroke Sound - Minimal & Swipeable */}
+          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-sm font-medium text-foreground block">Keystroke Sound</span>
+                <span className="text-xs text-muted">Acoustic mechanical switch click</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => updateSetting('soundEnabled', !settings.soundEnabled)}
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors shrink-0 ${
+                  settings.soundEnabled ? 'bg-accent justify-end' : 'bg-subtle justify-start'
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full bg-background shadow" />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => updateSetting('soundEnabled', !settings.soundEnabled)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors shrink-0 ${
-                settings.soundEnabled ? 'bg-accent justify-end' : 'bg-subtle justify-start'
-              }`}
-            >
-              <div className="w-4 h-4 rounded-full bg-background shadow" />
-            </button>
+            {/* Minimal sound profile swipeable bar */}
+            {settings.soundEnabled && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                {SOUND_THEMES.map((theme) => {
+                  const isSelected = settings.soundTheme === theme.id;
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => updateSetting('soundTheme', theme.id)}
+                      className={`px-3 py-1 text-xs rounded uppercase font-medium whitespace-nowrap transition-all shrink-0 ${
+                        isSelected
+                          ? 'bg-accent text-background font-bold shadow'
+                          : 'bg-surface border border-subtle/80 text-muted hover:text-foreground'
+                      }`}
+                    >
+                      {theme.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
