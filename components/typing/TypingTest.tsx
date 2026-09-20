@@ -1,99 +1,42 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { TypingEngine } from '@/lib/typing/engine';
-import { TypingState, TestMode } from '@/lib/typing/types';
-import { saveSession } from '@/lib/storage/sessions';
+import React, { useEffect, useState } from 'react';
+import { useTypingEngine } from '@/lib/typing/useTypingEngine';
 import { TestHeader } from './TestHeader';
 import { TypingText } from './TypingText';
 import { LiveMetrics } from './LiveMetrics';
 import { TestControls } from './TestControls';
-
-import { SettingsModal, SettingsState } from '@/components/settings/SettingsModal';
-import { playKeyClick, setSoundEnabled } from '@/lib/audio/sound';
+import { SettingsModal } from '@/components/settings/SettingsModal';
+import { setSoundEnabled } from '@/lib/audio/sound';
 
 export function TypingTest() {
-  const router = useRouter();
-  const engineRef = useRef<TypingEngine | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<TypingState | null>(null);
-  const [isFocused, setIsFocused] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Initialize typing engine once
+  const {
+    state,
+    isFocused,
+    inputRef,
+    handleRestart,
+    handleConfigChange,
+    handleContainerClick,
+    handleInputKeyDown,
+    handleInputChange,
+    handleBeforeInput,
+    focusInput,
+    setIsFocused,
+  } = useTypingEngine();
+
+  // Global custom event for opening settings
   useEffect(() => {
-    const engine = new TypingEngine('time', 30);
-    engineRef.current = engine;
-
-    const unsubscribe = engine.subscribe((newState) => {
-      setState(newState);
-    });
-
-    const unsubscribeFinish = engine.onFinish((session) => {
-      saveSession(session);
-      setTimeout(() => {
-        router.push('/results');
-      }, 250);
-    });
-
-    // Auto-focus typing input
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-
-    // Initialize sound preference (default on, or user setting)
-    try {
-      const data = localStorage.getItem('typeshii_settings_v1');
-      if (data) {
-        const parsed = JSON.parse(data);
-        if (typeof parsed.soundEnabled === 'boolean') {
-          setSoundEnabled(parsed.soundEnabled);
-        } else {
-          setSoundEnabled(true);
-        }
-      } else {
-        setSoundEnabled(true);
-      }
-    } catch {
-      setSoundEnabled(true);
-    }
-
     const handleOpenSettingsEvent = () => {
       setIsSettingsOpen(true);
     };
 
     window.addEventListener('open-settings', handleOpenSettingsEvent);
-
-    return () => {
-      window.removeEventListener('open-settings', handleOpenSettingsEvent);
-      unsubscribe();
-      unsubscribeFinish();
-      engine.destroy();
-    };
-  }, [router]);
-
-  // Restart / Reset handler
-  const handleRestart = useCallback(() => {
-    if (engineRef.current) {
-      engineRef.current.reset();
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
+    return () => window.removeEventListener('open-settings', handleOpenSettingsEvent);
   }, []);
 
-  // Mode and limit change handler
-  const handleConfigChange = useCallback((mode: TestMode, limit: number) => {
-    if (engineRef.current) {
-      engineRef.current.setConfig(mode, limit);
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-  }, []);
-
-  // Global key listener for shortcuts (Tab, Esc, Ctrl+Shift+P, 1-4) & focus handling
+  // Global shortcut listeners (Esc, Ctrl+Shift+P, Tab, 1-4 presets)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Ctrl+Shift+P opens settings / command modal
@@ -103,24 +46,24 @@ export function TypingTest() {
         return;
       }
 
-      // If modal is open, let modal handle keys (Esc closes modal)
+      // Modal handles its own escape
       if (isSettingsOpen) {
         if (e.key === 'Escape') {
           e.preventDefault();
           setIsSettingsOpen(false);
-          inputRef.current?.focus();
+          focusInput();
         }
         return;
       }
 
-      // Tab key restarts the test
+      // Tab restarts the test
       if (e.key === 'Tab') {
         e.preventDefault();
         handleRestart();
         return;
       }
 
-      // Esc key resets the test
+      // Esc resets the test
       if (e.key === 'Escape') {
         e.preventDefault();
         handleRestart();
@@ -151,7 +94,7 @@ export function TypingTest() {
         }
       }
 
-      // Auto-refocus hidden input if user presses any typing key
+      // Auto-refocus input if typing key pressed
       if (inputRef.current && document.activeElement !== inputRef.current && !isSettingsOpen) {
         inputRef.current.focus();
       }
@@ -159,72 +102,7 @@ export function TypingTest() {
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [handleRestart, handleConfigChange, state, isSettingsOpen]);
-
-  const handleContainerClick = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      setIsFocused(true);
-    }
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!engineRef.current) return;
-
-    if (e.key === ' ') {
-      playKeyClick('space');
-    } else if (e.key === 'Backspace') {
-      playKeyClick('backspace');
-    } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-      playKeyClick('char');
-    }
-
-    const handled = engineRef.current.handleKeyDown(e.nativeEvent);
-    if (handled) {
-      e.preventDefault();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    if (!val || !engineRef.current) return;
-
-    for (const char of val) {
-      if (char === ' ') {
-        playKeyClick('space');
-        engineRef.current.handleSpace();
-      } else {
-        playKeyClick('char');
-        engineRef.current.handleChar(char);
-      }
-    }
-    e.target.value = '';
-  };
-
-  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const nativeEvt = e.nativeEvent as InputEvent;
-    if (!engineRef.current) return;
-
-    if (nativeEvt.inputType === 'deleteContentBackward') {
-      playKeyClick('backspace');
-      engineRef.current.handleBackspace();
-      e.preventDefault();
-      return;
-    }
-
-    if (nativeEvt.data) {
-      for (const char of nativeEvt.data) {
-        if (char === ' ') {
-          playKeyClick('space');
-          engineRef.current.handleSpace();
-        } else {
-          playKeyClick('char');
-          engineRef.current.handleChar(char);
-        }
-      }
-      e.preventDefault();
-    }
-  };
+  }, [handleRestart, handleConfigChange, state, isSettingsOpen, focusInput, inputRef]);
 
   if (!state) return null;
 
@@ -297,7 +175,7 @@ export function TypingTest() {
         }}
         onClose={() => {
           setIsSettingsOpen(false);
-          inputRef.current?.focus();
+          focusInput();
         }}
       />
     </div>

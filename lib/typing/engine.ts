@@ -11,12 +11,16 @@ import { calculateWpm, calculateRawWpm, calculateAccuracy, calculateConsistency 
 import { generateWords } from '../words/word-bank';
 import { aggregateMistakes } from './word-analysis';
 
+/**
+ * Core state machine for Typeshii typing practice.
+ * Handles timer intervals, keystroke scoring, real-time metrics, and session finalization.
+ */
 export class TypingEngine {
   private state: TypingState;
   private listeners: Set<(state: TypingState) => void> = new Set();
   private finishListeners: Set<(session: TypingSession) => void> = new Set();
   private lastSession: TypingSession | null = null;
-  private timerInterval: any = null;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
   private wordStartTime: number = 0;
   private currentWordErrors: number = 0;
   private currentWordBackspaces: number = 0;
@@ -44,7 +48,7 @@ export class TypingEngine {
     };
   }
 
-  private notify() {
+  private notify(): void {
     const currentState = this.getState();
     this.listeners.forEach((listener) => listener(currentState));
   }
@@ -74,11 +78,17 @@ export class TypingEngine {
     };
   }
 
-  public setConfig(mode: TestMode, limit: number) {
+  /**
+   * Updates mode and limit configuration, resetting the current session.
+   */
+  public setConfig(mode: TestMode, limit: number): void {
     this.reset(mode, limit);
   }
 
-  public start() {
+  /**
+   * Starts the test timer on first keystroke.
+   */
+  public start(): void {
     if (this.state.status !== 'idle') return;
 
     const now = Date.now();
@@ -97,7 +107,10 @@ export class TypingEngine {
     this.notify();
   }
 
-  public tick() {
+  /**
+   * Timer tick handler; runs every second to update metrics and check limits.
+   */
+  public tick(): void {
     if (this.state.status !== 'running' || !this.state.startTime) return;
 
     this.state.elapsedTime += 1;
@@ -392,7 +405,10 @@ export class TypingEngine {
     return session;
   }
 
-  public reset(mode?: TestMode, limit?: number) {
+  /**
+   * Resets the test state. Optionally allows switching mode and limit.
+   */
+  public reset(mode?: TestMode, limit?: number): void {
     this.clearInterval();
     this.lastSession = null;
     const targetMode = mode || this.state.mode;
@@ -410,14 +426,17 @@ export class TypingEngine {
     this.notify();
   }
 
-  private clearInterval() {
+  private clearInterval(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
   }
 
-  public destroy() {
+  /**
+   * Cleans up timer and listeners when component unmounts.
+   */
+  public destroy(): void {
     this.clearInterval();
     this.listeners.clear();
     this.finishListeners.clear();

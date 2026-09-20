@@ -4,6 +4,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import { TestMode } from '@/lib/typing/types';
 import { Clock, Type } from 'lucide-react';
 
+export const TIME_OPTIONS = [15, 30, 60, 120] as const;
+export const WORD_OPTIONS = [10, 25, 50, 100] as const;
+
 interface TestHeaderProps {
   mode: TestMode;
   limit: number;
@@ -17,9 +20,6 @@ export function TestHeader({
   disabled = false,
   onConfigChange,
 }: TestHeaderProps) {
-  const timeOptions = [15, 30, 60, 120];
-  const wordOptions = [10, 25, 50, 100];
-
   // Refs for tracking button positions for smooth sliding animation
   const timeBtnRef = useRef<HTMLButtonElement>(null);
   const wordsBtnRef = useRef<HTMLButtonElement>(null);
@@ -28,9 +28,9 @@ export function TestHeader({
   const [modePillStyle, setModePillStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const [limitPillStyle, setLimitPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
-  // Update mode sliding pill
+  // Update sliding pill positions on mode/limit change or window resize
   useEffect(() => {
-    const updatePills = () => {
+    const updatePillPositions = () => {
       const activeRef = mode === 'time' ? timeBtnRef.current : wordsBtnRef.current;
       if (activeRef) {
         setModePillStyle({
@@ -40,8 +40,8 @@ export function TestHeader({
         });
       }
 
-      const options = mode === 'time' ? timeOptions : wordOptions;
-      const activeIndex = options.indexOf(limit);
+      const options = mode === 'time' ? TIME_OPTIONS : WORD_OPTIONS;
+      const activeIndex = (options as readonly number[]).indexOf(limit);
       const activeLimitRef = limitRefs.current[activeIndex];
       if (activeLimitRef) {
         setLimitPillStyle({
@@ -52,9 +52,9 @@ export function TestHeader({
       }
     };
 
-    updatePills();
-    window.addEventListener('resize', updatePills);
-    return () => window.removeEventListener('resize', updatePills);
+    updatePillPositions();
+    window.addEventListener('resize', updatePillPositions);
+    return () => window.removeEventListener('resize', updatePillPositions);
   }, [mode, limit]);
 
   return (
@@ -62,7 +62,11 @@ export function TestHeader({
       {/* Square roundish container */}
       <div className="flex flex-wrap xs:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-xl bg-surface/90 border border-subtle/80 shadow-md backdrop-blur-sm text-[11px] sm:text-xs font-poppins select-none max-w-full">
         {/* Mode Selector with animated sliding pill */}
-        <div className="relative flex items-center bg-background/50 p-0.5 sm:p-1 rounded-lg border border-subtle/40">
+        <div
+          role="radiogroup"
+          aria-label="Test Mode"
+          className="relative flex items-center bg-background/50 p-0.5 sm:p-1 rounded-lg border border-subtle/40"
+        >
           {/* Smooth Sliding Pill Indicator */}
           <div
             className="absolute top-0.5 bottom-0.5 sm:top-1 sm:bottom-1 rounded-md bg-accent/15 border border-accent/30 pointer-events-none transition-all duration-200 ease-out"
@@ -76,6 +80,8 @@ export function TestHeader({
           <button
             ref={timeBtnRef}
             type="button"
+            role="radio"
+            aria-checked={mode === 'time'}
             disabled={disabled}
             onClick={() => onConfigChange('time', 30)}
             className={`relative z-10 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors duration-150 ${
@@ -91,6 +97,8 @@ export function TestHeader({
           <button
             ref={wordsBtnRef}
             type="button"
+            role="radio"
+            aria-checked={mode === 'words'}
             disabled={disabled}
             onClick={() => onConfigChange('words', 50)}
             className={`relative z-10 flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors duration-150 ${
@@ -108,7 +116,11 @@ export function TestHeader({
         <div className="hidden xs:block w-[1px] h-4 sm:h-5 bg-subtle/80 mx-0.5" />
 
         {/* Limits Selector with animated sliding pill */}
-        <div className="relative flex items-center bg-background/50 p-0.5 sm:p-1 rounded-lg border border-subtle/40">
+        <div
+          role="radiogroup"
+          aria-label="Test Limit"
+          className="relative flex items-center bg-background/50 p-0.5 sm:p-1 rounded-lg border border-subtle/40"
+        >
           {/* Smooth Sliding Pill Indicator */}
           <div
             className="absolute top-0.5 bottom-0.5 sm:top-1 sm:bottom-1 rounded-md bg-accent/15 border border-accent/30 pointer-events-none transition-all duration-200 ease-out"
@@ -119,13 +131,15 @@ export function TestHeader({
             }}
           />
 
-          {(mode === 'time' ? timeOptions : wordOptions).map((opt, idx) => (
+          {(mode === 'time' ? TIME_OPTIONS : WORD_OPTIONS).map((opt, idx) => (
             <button
               key={opt}
               ref={(el) => {
                 limitRefs.current[idx] = el;
               }}
               type="button"
+              role="radio"
+              aria-checked={limit === opt}
               disabled={disabled}
               onClick={() => onConfigChange(mode, opt)}
               className={`relative z-10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors duration-150 ${

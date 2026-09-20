@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { TypingState } from '@/lib/typing/types';
 import { calculateWpm, calculateAccuracy } from '@/lib/typing/metrics';
 
@@ -7,8 +8,18 @@ interface LiveMetricsProps {
   state: TypingState;
 }
 
-export function LiveMetrics({ state }: LiveMetricsProps) {
-  const { mode, timeLimit, wordLimit, currentWordIndex, elapsedTime, correctChars, incorrectChars, extraChars, status } = state;
+export const LiveMetrics = memo(function LiveMetrics({ state }: LiveMetricsProps) {
+  const {
+    mode,
+    timeLimit,
+    wordLimit,
+    currentWordIndex,
+    elapsedTime,
+    correctChars,
+    incorrectChars,
+    extraChars,
+    status,
+  } = state;
 
   const remainingTime = Math.max(0, timeLimit - elapsedTime);
   const totalTyped = correctChars + incorrectChars + extraChars;
@@ -18,7 +29,7 @@ export function LiveMetrics({ state }: LiveMetricsProps) {
   return (
     <div className="w-full flex items-center justify-between font-poppins mb-2 sm:mb-4 text-xs sm:text-sm select-none">
       {/* Primary Counter (Time remaining or Words progress) */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3" aria-live="polite">
         <span className="text-2xl sm:text-4xl font-bold text-accent tracking-tight">
           {mode === 'time'
             ? status === 'idle'
@@ -45,4 +56,4 @@ export function LiveMetrics({ state }: LiveMetricsProps) {
       </div>
     </div>
   );
-}
+});

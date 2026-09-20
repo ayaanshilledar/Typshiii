@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import { RotateCcw } from 'lucide-react';
 
 interface TestControlsProps {
@@ -7,7 +8,7 @@ interface TestControlsProps {
   onOpenSettings?: () => void;
 }
 
-export function TestControls({ onRestart, onOpenSettings }: TestControlsProps) {
+export const TestControls = memo(function TestControls({ onRestart, onOpenSettings }: TestControlsProps) {
   return (
     <div className="w-full flex flex-col items-center justify-center gap-3 sm:gap-5 mt-6 sm:mt-10">
       <button
@@ -60,4 +61,4 @@ export function TestControls({ onRestart, onOpenSettings }: TestControlsProps) {
       </div>
     </div>
   );
-}
+});

@@ -1,7 +1,9 @@
 import { TypingSession } from '../typing/types';
 
-const STORAGE_KEY = 'monkeytyping_sessions_v1';
-const LATEST_SESSION_KEY = 'monkeytyping_latest_session_v1';
+const STORAGE_KEY = 'typeshii_sessions_v1';
+const LATEST_SESSION_KEY = 'typeshii_latest_session_v1';
+const LEGACY_STORAGE_KEY = 'monkeytyping_sessions_v1';
+const LEGACY_LATEST_KEY = 'monkeytyping_latest_session_v1';
 
 export type UserStats = {
   totalTests: number;
@@ -34,7 +36,8 @@ export function getSavedSessions(): TypingSession[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data =
+      localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch (error) {
     console.error('Failed to load sessions from localStorage:', error);
@@ -49,7 +52,8 @@ export function getLatestSession(): TypingSession | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const data = localStorage.getItem(LATEST_SESSION_KEY);
+    const data =
+      localStorage.getItem(LATEST_SESSION_KEY) || localStorage.getItem(LEGACY_LATEST_KEY);
     if (data) return JSON.parse(data);
 
     const sessions = getSavedSessions();
@@ -105,6 +109,8 @@ export function clearHistory(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LATEST_SESSION_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_LATEST_KEY);
   } catch (error) {
     console.error('Failed to clear session history:', error);
   }

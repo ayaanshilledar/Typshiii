@@ -1,5 +1,5 @@
 /**
- * Pure metrics calculation functions for MonkeyTyping
+ * Pure metrics calculation functions for Typeshii
  */
 
 /**
