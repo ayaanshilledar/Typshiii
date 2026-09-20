@@ -329,9 +329,6 @@ export class TypingEngine {
     return true;
   }
 
-    return false;
-  }
-
   public finish(): TypingSession {
     if (this.state.status === 'finished' && this.lastSession) {
       return this.lastSession;

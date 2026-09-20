@@ -36,9 +36,7 @@ export const COMMON_WORDS = [
   'early', 'food', 'before', 'moment', 'himself', 'air', 'teacher', 'force', 'offer', 'enough'
 ];
 
-/**
- * Generates an array of words avoiding adjacent repetitions.
- */
+
 export function generateWords(count: number): string[] {
   const result: string[] = [];
   let prevWord = '';
