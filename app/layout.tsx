@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
+import { Analytics } from '@vercel/analytics/next';
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -40,6 +41,7 @@ export default function RootLayout({
         <main className="flex-1 flex flex-col w-full px-3 sm:px-8 md:px-12 lg:px-16">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );

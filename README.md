@@ -12,6 +12,10 @@
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
+  <br/><br/>
+
+  <img src="public/background/screenshot-studio-1789908888263.png" alt="TypeShi Interface Preview" width="100%" />
+
 </div>
 
 ---
