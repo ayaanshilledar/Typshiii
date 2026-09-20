@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getLatestSession } from '@/lib/storage/sessions';
@@ -9,19 +9,33 @@ import { ResultSummary } from '@/components/results/ResultSummary';
 import { WpmChart } from '@/components/results/WpmChart';
 import { WordAnalysis } from '@/components/results/WordAnalysis';
 import { ErrorAnalysis } from '@/components/results/ErrorAnalysis';
+import { MistakeReplay } from '@/components/results/MistakeReplay';
 import { RotateCcw, History, ArrowRight } from 'lucide-react';
 
 export default function ResultsPage() {
   const router = useRouter();
   const [session, setSession] = useState<TypingSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReviewingMistakes, setIsReviewingMistakes] = useState(false);
 
   useEffect(() => {
     const latest = getLatestSession();
     setSession(latest);
     setIsLoading(false);
+  }, []);
 
+  // Filter words that had errors or were typed incorrectly
+  const mistakeWords = useMemo(() => {
+    if (!session || !session.words) return [];
+    return session.words.filter(
+      (w) => !w.correct || w.errors > 0 || (w.typed && w.typed !== w.word)
+    );
+  }, [session]);
+
+  // Global shortcut to restart, paused when replay modal is active
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isReviewingMistakes) return;
       if (e.key === 'Tab' || e.key === 'Enter') {
         e.preventDefault();
         router.push('/');
@@ -30,7 +44,7 @@ export default function ResultsPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+  }, [router, isReviewingMistakes]);
 
   if (isLoading) {
     return (
@@ -66,7 +80,21 @@ export default function ResultsPage() {
           <span>{new Date(session.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto flex-wrap">
+          {mistakeWords.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsReviewingMistakes((prev) => !prev)}
+              className={`flex-1 sm:flex-none flex items-center justify-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                isReviewingMistakes
+                  ? 'bg-accent text-background shadow'
+                  : 'bg-surface border border-accent/50 text-accent hover:bg-accent/10 hover:border-accent'
+              }`}
+            >
+              <span>Review mistakes ({mistakeWords.length})</span>
+            </button>
+          )}
+
           <Link
             href="/"
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-background text-xs font-semibold hover:bg-accent-hover transition-colors"
@@ -83,6 +111,14 @@ export default function ResultsPage() {
           </Link>
         </div>
       </div>
+
+      {/* Mistake Replay Active Panel */}
+      {isReviewingMistakes && mistakeWords.length > 0 && (
+        <MistakeReplay
+          mistakes={mistakeWords}
+          onClose={() => setIsReviewingMistakes(false)}
+        />
+      )}
 
       {/* Hero Result Summary */}
       <ResultSummary session={session} />

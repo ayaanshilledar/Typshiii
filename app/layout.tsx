@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: 'Typeshii — Pure Speed & Keystroke Precision',
   description:
     'A clean, responsive typing practice website measuring WPM, Raw WPM, accuracy, errors, and per-word performance without clutter.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
 };
 
 export const viewport: Viewport = {

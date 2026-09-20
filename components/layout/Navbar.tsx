@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BarChart2, History, Settings as SettingsIcon } from 'lucide-react';
-import { BrandLogo } from './BrandLogo';
-
 export function Navbar() {
   const pathname = usePathname();
 
@@ -15,8 +13,7 @@ export function Navbar() {
 
   return (
     <header className="w-full px-3 sm:px-8 lg:px-16 pt-3 sm:pt-6 pb-2 sm:pb-4 flex items-center justify-between font-poppins">
-      <Link href="/" className="group py-1 flex items-center gap-2 sm:gap-3 select-none">
-        <BrandLogo size={24} name="TYPESHII" />
+      <Link href="/" className="group py-1 flex items-center gap-2 select-none">
         <span className="text-base sm:text-xl font-bold tracking-wider text-foreground group-hover:opacity-90 transition-opacity font-poppins">
           TYPESHII
         </span>
