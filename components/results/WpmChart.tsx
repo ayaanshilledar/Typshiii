@@ -36,12 +36,12 @@ export function WpmChart({ timeline }: WpmChartProps) {
   const yMax = Math.ceil(maxWpm / 20) * 20 + 10;
 
   return (
-    <div className="w-full py-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="w-full py-4 sm:py-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <span className="text-xs uppercase tracking-widest text-muted font-mono">
           performance over time
         </span>
-        <div className="flex items-center gap-4 text-xs font-mono">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-0.5 bg-accent inline-block" />
             <span className="text-foreground">wpm</span>
@@ -53,9 +53,9 @@ export function WpmChart({ timeline }: WpmChartProps) {
         </div>
       </div>
 
-      <div className="w-full h-64 font-mono">
+      <div className="w-full h-52 sm:h-64 font-mono">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <LineChart data={timeline} margin={{ top: 10, right: 8, left: -25, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
             <XAxis
               dataKey="second"

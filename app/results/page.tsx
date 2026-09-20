@@ -59,24 +59,24 @@ export default function ResultsPage() {
   return (
     <div className="w-full py-4 sm:py-6 flex flex-col gap-6 font-poppins">
       {/* Action Header */}
-      <div className="flex items-center justify-between font-poppins">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-poppins">
         <div className="flex items-center gap-2 text-xs text-muted">
           <span>Session Completed</span>
           <span>•</span>
           <span>{new Date(session.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           <Link
             href="/"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-background text-xs font-semibold hover:bg-accent-hover transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-background text-xs font-semibold hover:bg-accent-hover transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Type Again (Tab)</span>
+            <span>Type Again</span>
           </Link>
           <Link
             href="/history"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface border border-subtle text-muted hover:text-foreground text-xs transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-subtle text-muted hover:text-foreground text-xs transition-colors"
           >
             <History className="w-3.5 h-3.5" />
             <span>History</span>

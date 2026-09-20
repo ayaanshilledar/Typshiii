@@ -71,18 +71,18 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         ref={modalRef}
-        className="w-full max-w-lg bg-surface border border-subtle/90 rounded-xl shadow-2xl p-6 flex flex-col gap-6 font-poppins relative animate-in zoom-in-95 duration-150 select-none"
+        className="w-full max-w-lg bg-surface border border-subtle/90 rounded-xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 font-poppins relative animate-in zoom-in-95 duration-150 select-none max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-subtle/50">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-subtle/50">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <Sliders className="w-4 h-4 text-accent" />
             <h2 className="text-base font-semibold text-foreground tracking-tight">settings</h2>
             {saved && (
@@ -96,28 +96,29 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-muted hover:text-foreground hover:bg-subtle/50 transition-colors"
+            aria-label="Close settings"
+            className="p-1.5 rounded-md text-muted hover:text-foreground hover:bg-subtle/50 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Options list */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           {/* Caret Style */}
-          <div className="p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
+          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2.5 sm:gap-3">
             <div>
               <span className="text-sm font-medium text-foreground block">Caret Style</span>
               <span className="text-xs text-muted">Appearance of cursor on words</span>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 self-end xs:self-auto">
               {(['line', 'block', 'underline'] as const).map((style) => (
                 <button
                   key={style}
                   type="button"
                   onClick={() => updateSetting('caretStyle', style)}
-                  className={`px-3 py-1 text-xs rounded uppercase font-medium transition-all ${
+                  className={`px-2.5 sm:px-3 py-1 text-xs rounded uppercase font-medium transition-all ${
                     settings.caretStyle === style
                       ? 'bg-accent text-background font-bold shadow'
                       : 'bg-surface border border-subtle/80 text-muted hover:text-foreground'
@@ -130,7 +131,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
           </div>
 
           {/* Live WPM Indicator */}
-          <div className="p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
+          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
             <div>
               <span className="text-sm font-medium text-foreground block">Live WPM Indicator</span>
               <span className="text-xs text-muted">Show speed in real-time while typing</span>
@@ -139,7 +140,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
             <button
               type="button"
               onClick={() => updateSetting('showLiveWpm', !settings.showLiveWpm)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors shrink-0 ${
                 settings.showLiveWpm ? 'bg-accent justify-end' : 'bg-subtle justify-start'
               }`}
             >
@@ -148,7 +149,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
           </div>
 
           {/* Live Accuracy Indicator */}
-          <div className="p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
+          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
             <div>
               <span className="text-sm font-medium text-foreground block">Live Accuracy</span>
               <span className="text-xs text-muted">Show live percentage accuracy</span>
@@ -157,7 +158,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
             <button
               type="button"
               onClick={() => updateSetting('showLiveAcc', !settings.showLiveAcc)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors shrink-0 ${
                 settings.showLiveAcc ? 'bg-accent justify-end' : 'bg-subtle justify-start'
               }`}
             >
@@ -166,7 +167,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
           </div>
 
           {/* Sound toggle */}
-          <div className="p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
+          <div className="p-3 sm:p-3.5 rounded-lg bg-background/50 border border-subtle/60 flex items-center justify-between gap-3">
             <div>
               <span className="text-sm font-medium text-foreground block">Keystroke Sound</span>
               <span className="text-xs text-muted">Mechanical switch click audio</span>
@@ -175,7 +176,7 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
             <button
               type="button"
               onClick={() => updateSetting('soundEnabled', !settings.soundEnabled)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors shrink-0 ${
                 settings.soundEnabled ? 'bg-accent justify-end' : 'bg-subtle justify-start'
               }`}
             >
@@ -186,8 +187,9 @@ export function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsMod
 
         {/* Footer info */}
         <div className="pt-2 flex items-center justify-between text-xs text-muted/60 border-t border-subtle/30 font-mono">
-          <span>press esc to close</span>
-          <span>changes auto-saved</span>
+          <span className="hidden xs:inline">press esc or tap outside to close</span>
+          <span className="xs:hidden">tap outside to close</span>
+          <span>auto-saved</span>
         </div>
       </div>
     </div>

@@ -53,12 +53,12 @@ export function TypingText({ state }: TypingTextProps) {
       const activeWord = activeWordRef.current;
 
       const offsetTop = activeWord.offsetTop;
-      const lineHeight = 52; // line height for comfortable reading
+      const lineHeight = activeWord.offsetHeight || 42;
 
       // If active word is on line 2 or lower, scroll smoothly
-      if (offsetTop > lineHeight) {
+      if (offsetTop > lineHeight * 0.8) {
         container.scrollTo({
-          top: offsetTop - lineHeight,
+          top: offsetTop - lineHeight * 0.8,
           behavior: 'smooth',
         });
       } else {
@@ -77,24 +77,24 @@ export function TypingText({ state }: TypingTextProps) {
     <div
       ref={containerRef}
       style={{ fontFamily: "'Poppins', sans-serif" }}
-      className="relative w-full max-h-[168px] overflow-hidden select-none font-poppins text-2xl sm:text-3xl leading-[52px] tracking-wide focus:outline-none transition-opacity duration-200"
+      className="relative w-full max-h-[120px] xs:max-h-[136px] sm:max-h-[168px] overflow-hidden select-none font-poppins text-lg xs:text-xl sm:text-2xl md:text-3xl leading-[36px] xs:leading-[42px] sm:leading-[50px] tracking-wide focus:outline-none transition-opacity duration-200"
     >
       {/* Dynamic Animated Caret */}
       {status !== 'finished' && (
         <div
-          className={`absolute w-[3px] bg-accent rounded-full pointer-events-none caret-smooth z-10 ${
+          className={`absolute w-[2.5px] sm:w-[3px] bg-accent rounded-full pointer-events-none caret-smooth z-10 ${
             status === 'idle' ? 'animate-blink' : ''
           }`}
           style={{
             left: `${caretPos.left}px`,
-            top: `${caretPos.top + 6}px`,
-            height: `${caretPos.height - 12}px`,
+            top: `${caretPos.top + 3}px`,
+            height: `${Math.max(22, caretPos.height - 6)}px`,
           }}
         />
       )}
 
       {/* Words Stream */}
-      <div className="flex flex-wrap gap-x-3.5 gap-y-1">
+      <div className="flex flex-wrap gap-x-2.5 sm:gap-x-3.5 gap-y-0.5 sm:gap-y-1">
         {words.map((word, wIdx) => {
           const isPast = wIdx < currentWordIndex;
           const isCurrent = wIdx === currentWordIndex;

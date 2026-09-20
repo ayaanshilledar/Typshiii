@@ -49,33 +49,35 @@ export function HistoryTable({ sessions, onClear }: HistoryTableProps) {
           No test sessions recorded yet. Start a test on the home page!
         </div>
       ) : (
-        <div className="w-full overflow-x-auto border border-subtle rounded bg-surface/30">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-surface border-b border-subtle text-muted text-[11px] uppercase tracking-wider">
+        <div className="w-full overflow-x-auto border border-subtle/80 rounded-lg bg-surface/30 shadow-inner">
+          <table className="w-full min-w-[420px] text-left text-xs">
+            <thead className="bg-surface border-b border-subtle text-muted text-[10px] sm:text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4 font-semibold">wpm</th>
-                <th className="py-3 px-4 font-semibold">raw</th>
-                <th className="py-3 px-4 font-semibold">acc</th>
-                <th className="py-3 px-4 font-semibold">mode</th>
-                <th className="py-3 px-4 font-semibold">errors</th>
-                <th className="py-3 px-4 font-semibold">date</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">wpm</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">raw</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">acc</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">mode</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">errors</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold">date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-subtle/40">
               {sessions.map((item) => (
                 <tr key={item.id} className="hover:bg-subtle/20 transition-colors">
-                  <td className="py-3 px-4 font-bold text-accent text-sm">
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-bold text-accent text-xs sm:text-sm">
                     {Math.round(item.wpm)}
                   </td>
-                  <td className="py-3 px-4 text-muted">{item.rawWpm}</td>
-                  <td className="py-3 px-4 font-semibold text-foreground">{item.accuracy}%</td>
-                  <td className="py-3 px-4 text-muted">{item.mode}</td>
-                  <td className="py-3 px-4 text-muted">
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 text-muted">{item.rawWpm}</td>
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 font-semibold text-foreground">{item.accuracy}%</td>
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 text-muted">{item.mode}</td>
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 text-muted">
                     <span className={item.errors > 0 ? 'text-error' : 'text-emerald-500'}>
                       {item.errors}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-muted/70">{formatDate(item.date)}</td>
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-4 text-muted/70 text-[11px] sm:text-xs whitespace-nowrap">
+                    {formatDate(item.date)}
+                  </td>
                 </tr>
               ))}
             </tbody>

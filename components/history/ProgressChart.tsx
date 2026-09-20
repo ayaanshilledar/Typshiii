@@ -39,17 +39,17 @@ export function ProgressChart({ sessions }: ProgressChartProps) {
   const maxWpm = Math.max(...chartData.map((d) => d.wpm), 40);
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 py-2">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 py-2">
       {/* Chart 1: WPM Over Time */}
-      <div className="p-4 rounded border border-subtle bg-surface/40 font-mono">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3.5 sm:p-4 rounded border border-subtle bg-surface/40 font-mono">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <span className="text-xs uppercase tracking-widest text-muted">
             wpm progression
           </span>
           <span className="text-xs text-accent">Speed</span>
         </div>
 
-        <div className="w-full h-52">
+        <div className="w-full h-44 sm:h-52">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />

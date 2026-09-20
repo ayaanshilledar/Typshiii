@@ -13,7 +13,7 @@ export function WordAnalysis({ words }: WordAnalysisProps) {
   const problematic = getMostProblematicWords(words, 4);
 
   return (
-    <div className="w-full flex flex-col gap-6 py-6 border-t border-subtle">
+    <div className="w-full flex flex-col gap-4 sm:gap-6 py-4 sm:py-6 border-t border-subtle">
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-widest text-muted font-mono">
           word performance
@@ -21,7 +21,7 @@ export function WordAnalysis({ words }: WordAnalysisProps) {
         <span className="text-xs text-muted font-mono">{words.length} words completed</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Fastest Words */}
         <div className="bg-surface/50 border border-subtle rounded p-4 font-mono">
           <div className="flex items-center gap-2 text-xs text-accent mb-3 font-semibold">

@@ -185,28 +185,54 @@ export function TypingTest() {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!val || !engineRef.current) return;
+
+    for (const char of val) {
+      if (char === ' ') {
+        playKeyClick('space');
+        engineRef.current.handleSpace();
+      } else {
+        playKeyClick('char');
+        engineRef.current.handleChar(char);
+      }
+    }
+    e.target.value = '';
+  };
+
+  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const nativeEvt = e.nativeEvent as InputEvent;
+    if (!engineRef.current) return;
+
+    if (nativeEvt.inputType === 'deleteContentBackward') {
+      playKeyClick('backspace');
+      engineRef.current.handleBackspace();
+      e.preventDefault();
+      return;
+    }
+
+    if (nativeEvt.data) {
+      for (const char of nativeEvt.data) {
+        if (char === ' ') {
+          playKeyClick('space');
+          engineRef.current.handleSpace();
+        } else {
+          playKeyClick('char');
+          engineRef.current.handleChar(char);
+        }
+      }
+      e.preventDefault();
+    }
+  };
+
   if (!state) return null;
 
   return (
     <div
       onClick={handleContainerClick}
-      className="w-full py-8 sm:py-12 flex flex-col items-center justify-center cursor-default outline-none select-none relative min-h-[460px]"
+      className="w-full py-3 sm:py-8 md:py-12 flex flex-col items-center justify-center cursor-default outline-none select-none relative min-h-[340px] sm:min-h-[440px]"
     >
-      {/* Hidden input to capture keystrokes on desktop & mobile */}
-      <input
-        ref={inputRef}
-        type="text"
-        className="absolute opacity-0 pointer-events-none -top-96 left-0"
-        onKeyDown={handleInputKeyDown}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        autoFocus
-        autoCapitalize="off"
-        autoComplete="off"
-        autoCorrect="off"
-        spellCheck={false}
-      />
-
       {/* Top Test Configuration (Time/Words options) */}
       <TestHeader
         mode={state.mode}
@@ -216,19 +242,42 @@ export function TypingTest() {
       />
 
       {/* Live Timer & Live WPM Counter */}
-      <div className="w-full px-2 sm:px-4">
+      <div className="w-full px-1 sm:px-4">
         <LiveMetrics state={state} />
       </div>
 
       {/* Typing Surface */}
-      <div className="w-full px-2 sm:px-4 relative">
+      <div className="w-full px-1 sm:px-4 relative group">
+        {/* Invisible transparent input placed over typing surface for touch & keyboard focus */}
+        <input
+          ref={inputRef}
+          type="text"
+          value=""
+          onChange={handleInputChange}
+          onBeforeInput={handleBeforeInput}
+          onKeyDown={handleInputKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-text text-base"
+          autoFocus
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
+          tabIndex={0}
+        />
+
         <TypingText state={state} />
 
         {/* Unfocused notification indicator */}
         {!isFocused && state.status !== 'finished' && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center cursor-pointer z-20 rounded-md transition-opacity">
-            <span className="text-sm font-sans font-medium text-accent">
-              click here or press any key to focus
+          <div
+            onClick={handleContainerClick}
+            className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center cursor-pointer z-20 rounded-lg transition-opacity p-4 text-center"
+          >
+            <span className="text-xs sm:text-sm font-sans font-medium text-accent bg-surface/90 px-4 py-2 rounded-full border border-subtle/80 shadow-md">
+              tap here or press any key to focus
             </span>
           </div>
         )}

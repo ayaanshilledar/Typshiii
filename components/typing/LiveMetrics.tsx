@@ -16,10 +16,10 @@ export function LiveMetrics({ state }: LiveMetricsProps) {
   const currentAcc = calculateAccuracy(correctChars, totalTyped);
 
   return (
-    <div className="w-full flex items-center justify-between font-poppins mb-4 text-sm select-none">
+    <div className="w-full flex items-center justify-between font-poppins mb-2 sm:mb-4 text-xs sm:text-sm select-none">
       {/* Primary Counter (Time remaining or Words progress) */}
-      <div className="flex items-center gap-3">
-        <span className="text-3xl sm:text-4xl font-bold text-accent tracking-tight">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span className="text-2xl sm:text-4xl font-bold text-accent tracking-tight">
           {mode === 'time'
             ? status === 'idle'
               ? timeLimit
@@ -30,7 +30,7 @@ export function LiveMetrics({ state }: LiveMetricsProps) {
 
       {/* Live WPM & Accuracy (Visible when test is running) */}
       <div
-        className={`flex items-center gap-4 text-xs sm:text-sm text-muted transition-opacity duration-200 ${
+        className={`flex items-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-muted transition-opacity duration-200 ${
           status === 'running' ? 'opacity-100' : 'opacity-0'
         }`}
       >

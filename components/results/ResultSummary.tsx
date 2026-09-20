@@ -10,26 +10,26 @@ export function ResultSummary({ session }: ResultSummaryProps) {
   const { wpm, rawWpm, accuracy, consistency, duration, characters, errors, backspaces } = session;
 
   return (
-    <div className="w-full flex flex-col md:flex-row items-baseline justify-between gap-8 pb-8 border-b border-subtle">
+    <div className="w-full flex flex-col md:flex-row items-start md:items-baseline justify-between gap-6 sm:gap-8 pb-6 sm:pb-8 border-b border-subtle">
       {/* Hero Primary Metric: WPM and Accuracy */}
-      <div className="flex items-baseline gap-8">
+      <div className="flex items-baseline gap-6 sm:gap-8">
         <div>
           <span className="text-xs uppercase tracking-widest text-muted font-mono block">wpm</span>
-          <span className="text-6xl sm:text-7xl font-bold font-mono text-accent tracking-tighter">
+          <span className="text-5xl sm:text-6xl md:text-7xl font-bold font-mono text-accent tracking-tighter">
             {Math.round(wpm)}
           </span>
         </div>
 
         <div>
           <span className="text-xs uppercase tracking-widest text-muted font-mono block">acc</span>
-          <span className="text-5xl sm:text-6xl font-bold font-mono text-foreground tracking-tighter">
+          <span className="text-4xl sm:text-5xl md:text-6xl font-bold font-mono text-foreground tracking-tighter">
             {accuracy}%
           </span>
         </div>
       </div>
 
       {/* Secondary Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 font-mono text-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6 font-mono text-xs sm:text-sm w-full md:w-auto">
         <div>
           <span className="text-xs text-muted block mb-0.5">test type</span>
           <span className="text-foreground font-medium">{session.mode}</span>

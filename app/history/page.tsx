@@ -39,8 +39,8 @@ export default function HistoryPage() {
   return (
     <div className="w-full py-4 sm:py-6 flex flex-col gap-6 font-poppins">
       {/* Header */}
-      <div className="flex items-center justify-between font-poppins">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 font-poppins">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/"
             className="flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg bg-surface/70 border border-subtle/80 hover:border-subtle"
@@ -49,7 +49,7 @@ export default function HistoryPage() {
             <span>start typing</span>
           </Link>
           <span className="text-subtle">/</span>
-          <h1 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+          <h1 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-foreground">
             performance history
           </h1>
         </div>

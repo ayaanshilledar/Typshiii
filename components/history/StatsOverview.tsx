@@ -47,30 +47,30 @@ export function StatsOverview({ stats }: StatsOverviewProps) {
   ];
 
   return (
-    <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+    <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 font-mono">
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
           <div
             key={`stat-card-${idx}`}
-            className={`p-4 rounded border bg-surface/60 flex flex-col justify-between ${
+            className={`p-3 sm:p-4 rounded border bg-surface/60 flex flex-col justify-between ${
               card.highlight ? 'border-accent/40 shadow-sm' : 'border-subtle'
             }`}
           >
-            <div className="flex items-center justify-between text-muted mb-2 text-xs">
+            <div className="flex items-center justify-between text-muted mb-1.5 sm:mb-2 text-[10px] sm:text-xs">
               <span className="tracking-wider">{card.label}</span>
               <Icon className={`w-3.5 h-3.5 ${card.highlight ? 'text-accent' : 'text-muted'}`} />
             </div>
 
-            <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-1 sm:gap-1.5">
               <span
-                className={`text-2xl sm:text-3xl font-bold ${
+                className={`text-xl sm:text-2xl md:text-3xl font-bold ${
                   card.highlight ? 'text-accent' : 'text-foreground'
                 }`}
               >
                 {card.value}
               </span>
-              <span className="text-xs text-muted">{card.suffix}</span>
+              <span className="text-[10px] sm:text-xs text-muted">{card.suffix}</span>
             </div>
           </div>
         );

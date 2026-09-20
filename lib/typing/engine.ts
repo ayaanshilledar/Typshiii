@@ -157,152 +157,164 @@ export class TypingEngine {
       return false;
     }
 
-    if (this.state.status === 'idle') {
-      this.start();
-    }
-
     // Handle Backspace
     if (key === 'Backspace') {
-      this.state.backspaces += 1;
-      this.currentWordBackspaces += 1;
-
-      if (ctrlKey || altKey) {
-        // Ctrl+Backspace: Delete entire current word input
-        this.state.currentInput = '';
-      } else if (this.state.currentInput.length > 0) {
-        this.state.currentInput = this.state.currentInput.slice(0, -1);
-      } else if (this.state.currentWordIndex > 0) {
-        // Allow backspacing into previous word if desired
-        const prevIndex = this.state.currentWordIndex - 1;
-        const prevWordHistory = this.state.history[prevIndex];
-        if (prevWordHistory) {
-          this.state.currentWordIndex = prevIndex;
-          this.state.currentInput = prevWordHistory.typed;
-          this.state.history.pop();
-          if (this.state.wordResults.length > 0) {
-            this.state.wordResults.pop();
-          }
-        }
-      }
-
-      this.notify();
-      return true;
+      return this.handleBackspace(Boolean(ctrlKey || altKey));
     }
 
     // Handle Space (Word submission)
     if (key === ' ') {
-      // Don't advance if input is empty
-      if (this.state.currentInput.length === 0) {
-        return true;
-      }
-
-      const targetWord = this.state.words[this.state.currentWordIndex];
-      const typedWord = this.state.currentInput;
-      const isCorrect = targetWord === typedWord;
-
-      // Space counts as 1 correct char if word matches
-      if (isCorrect) {
-        this.state.correctChars += 1;
-      } else {
-        this.state.incorrectChars += 1;
-      }
-
-      const now = Date.now();
-      const wordDuration = Math.max(50, now - this.wordStartTime);
-
-      this.state.wordResults.push({
-        word: targetWord,
-        typed: typedWord,
-        correct: isCorrect,
-        durationMs: wordDuration,
-        errors: this.currentWordErrors,
-        backspaces: this.currentWordBackspaces,
-      });
-
-      this.state.history.push({
-        word: targetWord,
-        typed: typedWord,
-      });
-
-      this.state.currentWordIndex += 1;
-      this.state.currentInput = '';
-      this.wordStartTime = now;
-      this.currentWordErrors = 0;
-      this.currentWordBackspaces = 0;
-
-      // Check if word mode finished
-      if (
-        this.state.mode === 'words' &&
-        this.state.currentWordIndex >= this.state.wordLimit
-      ) {
-        this.finish();
-        return true;
-      }
-
-      // Check if we need more words buffer
-      if (this.state.currentWordIndex + 20 >= this.state.words.length) {
-        this.state.words.push(...generateWords(50));
-      }
-
-      this.notify();
-      return true;
+      return this.handleSpace();
     }
 
     // Handle single printable characters
     if (key.length === 1) {
-      const targetWord = this.state.words[this.state.currentWordIndex];
-      const charIndex = this.state.currentInput.length;
-      const expectedChar = charIndex < targetWord.length ? targetWord[charIndex] : '';
+      return this.handleChar(key);
+    }
 
-      this.state.currentInput += key;
+    return false;
+  }
 
-      if (charIndex < targetWord.length) {
-        if (key === expectedChar) {
-          this.state.correctChars += 1;
-        } else {
-          this.state.incorrectChars += 1;
-          this.currentWordErrors += 1;
-          this.state.errors.push({
-            index: charIndex,
-            expected: expectedChar,
-            typed: key,
-            timestamp: Date.now(),
-          });
+  public handleBackspace(ctrlOrAlt: boolean = false): boolean {
+    if (this.state.status === 'finished') return false;
+    if (this.state.status === 'idle') this.start();
+
+    this.state.backspaces += 1;
+    this.currentWordBackspaces += 1;
+
+    if (ctrlOrAlt) {
+      this.state.currentInput = '';
+    } else if (this.state.currentInput.length > 0) {
+      this.state.currentInput = this.state.currentInput.slice(0, -1);
+    } else if (this.state.currentWordIndex > 0) {
+      const prevIndex = this.state.currentWordIndex - 1;
+      const prevWordHistory = this.state.history[prevIndex];
+      if (prevWordHistory) {
+        this.state.currentWordIndex = prevIndex;
+        this.state.currentInput = prevWordHistory.typed;
+        this.state.history.pop();
+        if (this.state.wordResults.length > 0) {
+          this.state.wordResults.pop();
         }
+      }
+    }
+
+    this.notify();
+    return true;
+  }
+
+  public handleSpace(): boolean {
+    if (this.state.status === 'finished') return false;
+    if (this.state.status === 'idle') this.start();
+
+    if (this.state.currentInput.length === 0) {
+      return true;
+    }
+
+    const targetWord = this.state.words[this.state.currentWordIndex];
+    const typedWord = this.state.currentInput;
+    const isCorrect = targetWord === typedWord;
+
+    if (isCorrect) {
+      this.state.correctChars += 1;
+    } else {
+      this.state.incorrectChars += 1;
+    }
+
+    const now = Date.now();
+    const wordDuration = Math.max(50, now - this.wordStartTime);
+
+    this.state.wordResults.push({
+      word: targetWord,
+      typed: typedWord,
+      correct: isCorrect,
+      durationMs: wordDuration,
+      errors: this.currentWordErrors,
+      backspaces: this.currentWordBackspaces,
+    });
+
+    this.state.history.push({
+      word: targetWord,
+      typed: typedWord,
+    });
+
+    this.state.currentWordIndex += 1;
+    this.state.currentInput = '';
+    this.wordStartTime = now;
+    this.currentWordErrors = 0;
+    this.currentWordBackspaces = 0;
+
+    if (
+      this.state.mode === 'words' &&
+      this.state.currentWordIndex >= this.state.wordLimit
+    ) {
+      this.finish();
+      return true;
+    }
+
+    if (this.state.currentWordIndex + 20 >= this.state.words.length) {
+      this.state.words.push(...generateWords(50));
+    }
+
+    this.notify();
+    return true;
+  }
+
+  public handleChar(char: string): boolean {
+    if (this.state.status === 'finished') return false;
+    if (this.state.status === 'idle') this.start();
+
+    const targetWord = this.state.words[this.state.currentWordIndex];
+    const charIndex = this.state.currentInput.length;
+    const expectedChar = charIndex < targetWord.length ? targetWord[charIndex] : '';
+
+    this.state.currentInput += char;
+
+    if (charIndex < targetWord.length) {
+      if (char === expectedChar) {
+        this.state.correctChars += 1;
       } else {
-        // Extra characters typed beyond word length
-        this.state.extraChars += 1;
+        this.state.incorrectChars += 1;
         this.currentWordErrors += 1;
         this.state.errors.push({
           index: charIndex,
-          expected: ' ',
-          typed: key,
+          expected: expectedChar,
+          typed: char,
           timestamp: Date.now(),
         });
       }
+    } else {
+      this.state.extraChars += 1;
+      this.currentWordErrors += 1;
+      this.state.errors.push({
+        index: charIndex,
+        expected: ' ',
+        typed: char,
+        timestamp: Date.now(),
+      });
+    }
 
-      // Special check: if on last word in word mode and fully typed
-      if (
-        this.state.mode === 'words' &&
-        this.state.currentWordIndex === this.state.wordLimit - 1 &&
-        this.state.currentInput.length === targetWord.length
-      ) {
-        const isCorrect = targetWord === this.state.currentInput;
-        this.state.wordResults.push({
-          word: targetWord,
-          typed: this.state.currentInput,
-          correct: isCorrect,
-          durationMs: Math.max(50, Date.now() - this.wordStartTime),
-          errors: this.currentWordErrors,
-          backspaces: this.currentWordBackspaces,
-        });
-        this.finish();
-        return true;
-      }
-
-      this.notify();
+    if (
+      this.state.mode === 'words' &&
+      this.state.currentWordIndex === this.state.wordLimit - 1 &&
+      this.state.currentInput.length === targetWord.length
+    ) {
+      const isCorrect = targetWord === this.state.currentInput;
+      this.state.wordResults.push({
+        word: targetWord,
+        typed: this.state.currentInput,
+        correct: isCorrect,
+        durationMs: Math.max(50, Date.now() - this.wordStartTime),
+        errors: this.currentWordErrors,
+        backspaces: this.currentWordBackspaces,
+      });
+      this.finish();
       return true;
     }
+
+    this.notify();
+    return true;
+  }
 
     return false;
   }
